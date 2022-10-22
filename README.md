@@ -1,9 +1,133 @@
-# Deploy-to-AKS
-#watch this youtube here
-https://youtu.be/4Oa5HneTuKs
+###manuall azure deployment check webApp branch
+trigger:
+- master
 
-Repository for showcasing the deployment from Azure DevOps Pipelines to AKS.
+resources:
+- repo: self
 
-This repo has been used during the [CoderDave](https://youtube.com/CoderDave) live streaming:
+variables:
+  imageRepo: eagunu-python
+  tag: '$(Build.BuildId)'
 
-[![Deploy to AKS](https://img.youtube.com/vi/4Oa5HneTuKs/0.jpg)](https://youtu.be/4Oa5HneTuKs)
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        containerRegistry: 'azure-container-registry-connection'
+        repository: '$(imageRepo)'
+        command: 'buildAndPush'
+        Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+        tags: |
+          $(tag)
+          latest
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Pipeline.Workspace)/s/azure-aks.yaml'
+        artifact: 'manifests'
+        publishLocation: 'pipeline'
+- stage: Deploy
+  displayName: Deploy To Qa
+  dependsOn: Build
+  variables:
+    acrsecret: myacrsecretconnection
+  jobs:
+  - job: Deploy
+    displayName: Deploy To AKS
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'manifests'
+          targetPath: '$(Pipeline.Workspace)/manifests'
+      - task: KubernetesManifest@0
+        inputs:
+          action: 'createSecret'
+          kubernetesServiceConnection: 'myaks-markrg-connection'
+          namespace: 'default'
+          secretType: 'dockerRegistry'
+          secretName: '$(acrsecret)'
+          dockerRegistryEndpoint: 'azure-container-registry-connection'
+      - task: KubernetesManifest@0
+        inputs:
+          action: 'deploy'
+          kubernetesServiceConnection: 'myaks-markrg-connection'
+          namespace: 'default'
+          manifests: |
+            $(Pipeline.Workspace)/manifests/azure-aks.yaml
+#####################2
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  imageRepo: sampleapp
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        containerRegistry: 'azure-container-registry-connection'
+        repository: '$(imageRepo)'
+        command: 'buildAndPush'
+        Dockerfile: '$(Build.SourcesDirectory)/app/Dockerfile'
+        tags: |
+          $(tag)
+          latest
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Pipeline.Workspace)/s/kubernetes'
+        artifact: 'manifests'
+        publishLocation: 'pipeline'
+- stage: Deploy
+  displayName: Deploy To Dev
+  dependsOn: Build
+  variables:
+    acrsecret: myacrsecretconnection
+  jobs:
+  - job: Deploy
+    displayName: Deploy To AKS
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'manifests'
+          targetPath: '$(Pipeline.Workspace)/manifests'
+      - task: KubernetesManifest@0
+        inputs:
+          action: 'createSecret'
+          kubernetesServiceConnection: 'myaks-markrg-connection'
+          namespace: 'default'
+          secretType: 'dockerRegistry'
+          secretName: '$(acrsecret)'
+          dockerRegistryEndpoint: 'azure-container-registry-connection'
+      - task: KubernetesManifest@0
+        inputs:
+          action: 'deploy'
+          kubernetesServiceConnection: 'myaks-markrg-connection'
+          namespace: 'default'
+          manifests: |
+            $(Pipeline.Workspace)/manifests/deployment.yml
+            $(Pipeline.Workspace)/manifests/service.yml

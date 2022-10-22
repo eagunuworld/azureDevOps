@@ -1,0 +1,53 @@
+#Get  Kubernetes version in your preferred region into a bash variable. Replace <region> with the region of your choosing, for example eastus.
+version=$(az aks get-versions -l eastus --query 'orchestrators[-1].orchestratorVersion' -o tsv)
+#Create a Resource Group
+az group create --name agunuhandsonlab --location eastus
+#Create AKS using the latest version available
+https://www.coachdevops.com/2021/09/how-to-deploy-docker-containers-into.html
+https://www.coachdevops.com/2021/10/configure-acr-integration-for-existing.html
+az aks create --resource-group myRG --name myaks --enable-addons monitoring --kubernetes-version 1.23.3 --generate-ssh-keys --location eastus2
+###############
+az group create --name myResourceGroup --location southcentralus
+az aks create --resource-group myRG --name myaks --node-count 2 --enable-addons monitoring --generate-ssh-keys --node-vm-size Standard_DS2_v2
+az aks show --name myAKSCluster --resource-group myResourceGroup
+az aks update -n myAKSCluster -g myResourceGroup --attach-acr <acr-resource-id>
+Central US
+centralus
+Standard_D2s_v3
+DS2_v2
+az aks create --resource-group markRG --name myAKS --node-count 1 --generate-ssh-keys --attach-acr eagunuzone --location centralus --node-vm-size Standard_D2s_v3
+###########################
+#Create Azure Container Registry
+#Run the below command to create your own private container registry using Azure Container Registry (ACR).
+az acr create --resource-group myResourceGroup --name myacrrepo31 --sku Standard --location southcentralus
+#Connect to the cluster
+az aks update -n myAmyaksmyaks -g myResourceGroup --attach-acr  agunu2025
+az aks get-credentials --resource-group  markRG  --name myAKS --overwrite-existing
+az aks update -n myAKS -g markRG --attach-acr eagunuzone
+az acr check-health --name  eagunuzone --ignore-errors --yes
+az aks show --resource-group <myResourceGroup> --name <myAKSCluste> --query servicePrincipalProfile.clientId -o tsv
+az role assignment list --scope /subscriptions/7b37e520-40d4-4f75-8d55-539d695e3e76/resourceGroups/markRG /providers/Microsoft.ContainerRegistry/registries/eagunuzone -o table
+#To verify the connection to your cluster, use the kubectl get command to return a list of the cluster nodes.
+kubectl get nodes
+
+#az aks create --resource-group agunuhandsonlab --name myaksclusterxyz --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location eastus
+#Finished service principal creation[##################################]  100.0000%Operation failed with status: 'Bad Request'. Details: Provisioning of resource(s) for container service myaksclusterxyz in resource group agunuhandsonlab failed. Message: Operation could not be completed as it results in exceeding approved Total Regional Cores quota. Additional details - Deployment Model: Resource Manager, Location: eastus, Current Limit: 4, Current Usage: 3, Additional Required: 6, (Minimum) New Limit Required: 9.
+
+Github to azure acccess personal token
+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
+
+az group delete --resource-group
+
+az group create --name webApp --location eastus
+
+z login
+
+#Execute below command to create a resource group in Azure portal.
+
+az group create --name markRG --location centralus
+az group delete --resource-group myRG
+
+
+#Run the below command to create your own private container registry using Azure Container Registry (ACR).
+
+az acr create --resource-group markRG --name eagunuzone --sku Standard --location centralus
