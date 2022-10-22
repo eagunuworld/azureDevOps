@@ -1,9 +1,12 @@
-# Docker
-# Build a Docker image
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+trigger:
+- main
 
 resources:
 - repo: self
+
+variables:
+  imageRepo: sampleapp
+  tag: '$(Build.BuildId)'
 
 stages:
 - stage: Build
@@ -13,41 +16,71 @@ stages:
     displayName: Build
     pool:
       vmImage: ubuntu-latest
-    variables:
-       tags: $(Build.BuildId)
-
     steps:
-
     - task: Docker@2
       displayName: Build an image
       inputs:
-        command: build
-        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-        buildContext: '$(System.DefaultWorkingDirectory)'
-        repository: '$(AWS_ECR_REPOSITORY_URI)'
+        containerRegistry: 'K8SExamplesACR'
+        repository: '$(imageRepo)'
+        command: 'buildAndPush'
+        Dockerfile: '$(Build.SourcesDirectory)/app/Dockerfile'
         tags: |
-          $(Build.BuildId)
-          
-
-
-    - task: CopyFiles@2
+          $(tag)
+    - task: PublishPipelineArtifact@1
       inputs:
-        Contents: 'eks-deploy-from-ecr.yaml'
-        TargetFolder: '$(build.artifactstagingdirectory)'
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'drop'
-        publishLocation: 'Container'
-          
-    - task: ECRPushImage@1
-      inputs:
-        awsCredentials: '$(AWS_CREDENTIALS)'
-        regionName: '$(AWS_REGION)'
-        imageSource: 'imagename'
-        sourceImageName: '$(AWS_ECR_REPOSITORY_URI)'
-        sourceImageTag: '$(Build.BuildId)'
-        repositoryName: '$(AWS_ECR_REPOSITORY_NAME)'
-        pushTag: '$(Build.BuildId)'
+        targetPath: '$(Pipeline.Workspace)/s/kubernetes'
+        artifact: 'manifests'
+        publishLocation: 'pipeline'
         
-        
+- stage: Deploy
+  displayName: Deploy to Dev
+  dependsOn: Build
+  variables:
+    acrsecret: k8sexamplesacrauth
+    acrdevurl: 'k8sexamplesacr.azurecr.io'
+    replicaNo: 3
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy to AKS
+    environment: 'k8sdev.default'
+    pool: 
+      vmImage: ubuntu-latest
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'current'
+              artifactName: 'manifests'
+              targetPath: '$(Pipeline.Workspace)/manifests'
+          - task: KubernetesManifest@0
+            inputs:
+              action: 'createSecret'
+              namespace: 'default'
+              secretType: 'dockerRegistry'
+              secretName: '$(acrsecret)'
+              dockerRegistryEndpoint: 'K8SExamplesACR'
+          - task: replacetokens@3
+            displayName: Replace Tokens
+            inputs:
+              rootDirectory: '$(Pipeline.Workspace)/manifests/'
+              targetFiles: 'deployment.yml'
+              encoding: 'auto'
+              writeBOM: true
+              actionOnMissing: 'warn'
+              keepToken: false
+              tokenPrefix: '#'
+              tokenSuffix: '#'
+              useLegacyPattern: false
+              enableTransforms: false
+              enableTelemetry: true
+          - task: KubernetesManifest@0
+            inputs:
+              action: 'deploy'
+              namespace: 'default'
+              manifests: |
+                $(Pipeline.Workspace)/manifests/deployment.yml
+                $(Pipeline.Workspace)/manifests/service.yml
+              containers: '$(acrdevurl)/$(imageRepo):$(tag)'
+              imagePullSecrets: '$(acrsecret)'
