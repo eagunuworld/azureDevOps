@@ -30,24 +30,24 @@ stages:
           
 
 
-    - task: CopyFiles@2
-      inputs:
-        Contents: 'eks-deploy-from-ecr.yaml'
-        TargetFolder: '$(build.artifactstagingdirectory)'
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'drop'
-        publishLocation: 'Container'
+#     - task: CopyFiles@2
+#       inputs:
+#         Contents: 'eks-deploy-from-ecr.yaml'
+#         TargetFolder: '$(build.artifactstagingdirectory)'
+#     - task: PublishBuildArtifacts@1
+#       inputs:
+#         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+#         ArtifactName: 'drop'
+#         publishLocation: 'Container'
           
-    - task: ECRPushImage@1
-      inputs:
-        awsCredentials: '$(AWS_CREDENTIALS)'
-        regionName: '$(AWS_REGION)'
-        imageSource: 'imagename'
-        sourceImageName: '$(AWS_ECR_REPOSITORY_URI)'
-        sourceImageTag: '$(Build.BuildId)'
-        repositoryName: '$(AWS_ECR_REPOSITORY_NAME)'
-        pushTag: '$(Build.BuildId)'
+#     - task: ECRPushImage@1
+#       inputs:
+#         awsCredentials: '$(AWS_CREDENTIALS)'
+#         regionName: '$(AWS_REGION)'
+#         imageSource: 'imagename'
+#         sourceImageName: '$(AWS_ECR_REPOSITORY_URI)'
+#         sourceImageTag: '$(Build.BuildId)'
+#         repositoryName: '$(AWS_ECR_REPOSITORY_NAME)'
+#         pushTag: '$(Build.BuildId)'
         
         
