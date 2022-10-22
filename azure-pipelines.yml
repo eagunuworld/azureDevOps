@@ -21,12 +21,11 @@ stages:
     - task: Docker@2
       displayName: Build an image
       inputs:
-        containerRegistry: 'eagunuworld_azureDevOps_cred_dockerhub'
+        containerRegistry: 'eagunuworld_az_cred_dockerhub'
         repository: '$(repo)'
         command: 'build'
         Dockerfile: '**/Dockerfile'
         buildContext: '$(System.DefaultWorkingDirectory)'
-        tags: '$(Build.BuildId)'
           
 
 
