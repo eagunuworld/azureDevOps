@@ -9,7 +9,7 @@ resources:
 - repo: self
 
 variables:
-  imageRepo: $(dockerhub_repo)
+  imageRepo: eagunuworld/azure-demo
   tag: '$(Build.BuildId)'
 
 stages:
