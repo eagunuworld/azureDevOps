@@ -60,7 +60,7 @@ stages:
           namespace: 'default'
           secretType: 'dockerRegistry'
           secretName: '$(acrsecret)'
-          dockerRegistryEndpoint: 'imageRepo'
+          dockerRegistryEndpoint: 'eagunuworld_dockerhub_azure_creds'
       - task: KubernetesManifest@0
         inputs:
           action: 'deploy'
