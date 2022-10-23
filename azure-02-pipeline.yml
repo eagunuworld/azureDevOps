@@ -29,7 +29,7 @@ stages:
           latest
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: '$(Pipeline.Workspace)/s/kubernetes'
+        targetPath: '$(Pipeline.Workspace)/s/azure-aks.yaml'
         artifact: 'manifests'
         publishLocation: 'pipeline'
         
