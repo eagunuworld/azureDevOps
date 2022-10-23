@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: mypythondockerrepo
-        image: eagunuworld/python-dramed
+        image: eagunuworld/azure-demo
         ports:
         - containerPort: 5000
 # service type loadbalancer       
