@@ -24,7 +24,7 @@ stages:
     - task: Docker@2
       displayName: Build an image
       inputs:
-        containerRegistry: 'eagunuworld_az_cred_dockerhub'
+        containerRegistry: 'eagunuworld_dockerhub_azure_creds'
         repository: '$(imageRepo)'
         command: 'buildAndPush'
         Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
