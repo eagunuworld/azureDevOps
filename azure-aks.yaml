@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: mypythondockerrepo
-        image: eagunuworld/python-dramed:31
+        image: eagunuworld/python-dramed
         ports:
         - containerPort: 5000
 # service type loadbalancer       
