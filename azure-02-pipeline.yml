@@ -5,7 +5,7 @@ resources:
 - repo: self
 
 variables:
-  imageRepo: sampleapp
+  imageRepo: eagunuworld/azure-demo
   tag: '$(Build.BuildId)'
 
 stages:
@@ -20,12 +20,13 @@ stages:
     - task: Docker@2
       displayName: Build an image
       inputs:
-        containerRegistry: 'K8SExamplesACR'
+        containerRegistry: 'eagunuworld_dockerhub_azure_creds'
         repository: '$(imageRepo)'
         command: 'buildAndPush'
-        Dockerfile: '$(Build.SourcesDirectory)/app/Dockerfile'
+        Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
         tags: |
           $(tag)
+          latest
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: '$(Pipeline.Workspace)/s/kubernetes'
@@ -36,13 +37,12 @@ stages:
   displayName: Deploy to Dev
   dependsOn: Build
   variables:
-    acrsecret: k8sexamplesacrauth
-    acrdevurl: 'k8sexamplesacr.azurecr.io'
-    replicaNo: 3
+    dockerhub-secret: myacrsecretconnection
+    dockerurl: 'hub.docker.com'
   jobs:
   - deployment: Deploy
     displayName: Deploy to AKS
-    environment: 'k8sdev.default'
+    environment: 'cka-default.default'
     pool: 
       vmImage: ubuntu-latest
     strategy:
@@ -57,30 +57,16 @@ stages:
           - task: KubernetesManifest@0
             inputs:
               action: 'createSecret'
+              #kubernetesServiceConnection: 'eagunuworld_gke_clusters_creds'
               namespace: 'default'
               secretType: 'dockerRegistry'
-              secretName: '$(acrsecret)'
-              dockerRegistryEndpoint: 'K8SExamplesACR'
-          - task: replacetokens@3
-            displayName: Replace Tokens
-            inputs:
-              rootDirectory: '$(Pipeline.Workspace)/manifests/'
-              targetFiles: 'deployment.yml'
-              encoding: 'auto'
-              writeBOM: true
-              actionOnMissing: 'warn'
-              keepToken: false
-              tokenPrefix: '#'
-              tokenSuffix: '#'
-              useLegacyPattern: false
-              enableTransforms: false
-              enableTelemetry: true
+              secretName: '$(dockerhub-secret)'
+              dockerRegistryEndpoint: 'eagunuworld_dockerhub_azure_creds'
           - task: KubernetesManifest@0
             inputs:
               action: 'deploy'
               namespace: 'default'
               manifests: |
-                $(Pipeline.Workspace)/manifests/deployment.yml
-                $(Pipeline.Workspace)/manifests/service.yml
-              containers: '$(acrdevurl)/$(imageRepo):$(tag)'
-              imagePullSecrets: '$(acrsecret)'
+                $(Pipeline.Workspace)/manifests/azure-aks.yaml
+              containers: '$(dockerurl)/$(imageRepo):$(tag)'
+              imagePullSecrets: '$(dockerhub-secret)'
