@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: mypythondockerrepo
-        image: eagunuworld/azure-demo:$(Build.BuildId)
+        image: eagunuworld/azure-demo:58
         ports:
         - containerPort: 5000
 # service type loadbalancer       
