@@ -25,11 +25,12 @@ stages:
     steps:   
     # Task-1: Build Docker Image and push to Azure Container Registry ACR
     - task: Docker@2
+      displayName: Build And Push Image Dockerhub
       inputs:
         containerRegistry: 'eagunuworld_dockerhub_azure_creds'
         repository: '$(imageRepo)'
         command: 'buildAndPush'
-        Dockerfile: '**/Dockerfile'
+        Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
         tags: |
           $(tag)
           $(Build.SourceVersion)
