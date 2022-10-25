@@ -10,7 +10,7 @@ trigger:
 
 # Variables
 variables:
-  imageRepo: demopod
+  imageRepo: eagunuworld/azure-demo
   tag: '$(Build.BuildId)'
 
 stages:
