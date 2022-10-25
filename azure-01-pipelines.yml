@@ -37,34 +37,34 @@ stages:
         artifact: 'manifests'
         publishLocation: 'pipeline'
 
-- stage: Deploy
-  displayName: Deploy To Qa
-  dependsOn: Build
-  variables:
-    acrsecret: myacrsecretconnection
-  jobs:
-  - job: Deploy
-    displayName: Deploy To GKE
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-      - task: DownloadPipelineArtifact@2
-        inputs:
-          buildType: 'current'
-          artifactName: 'manifests'
-          targetPath: '$(Pipeline.Workspace)/manifests'
-      - task: KubernetesManifest@0
-        inputs:
-          action: 'createSecret'
-          kubernetesServiceConnection: 'eagunuworld_gke_clusters_creds'
-          namespace: 'demo'
-          secretType: 'dockerRegistry'
-          secretName: '$(acrsecret)'
-          dockerRegistryEndpoint: 'eagunuworld_dockerhub_azure_creds'
-      - task: KubernetesManifest@0
-        inputs:
-          action: 'deploy'
-          kubernetesServiceConnection: 'eagunuworld_gke_clusters_creds'
-          namespace: 'demo'
-          manifests: |
-            $(Pipeline.Workspace)/manifests/azure-aks.yaml
+# - stage: Deploy
+#   displayName: Deploy To Qa
+#   dependsOn: Build
+#   variables:
+#     acrsecret: myacrsecretconnection
+#   jobs:
+#   - job: Deploy
+#     displayName: Deploy To GKE
+#     pool:
+#       vmImage: ubuntu-latest
+#     steps:
+#       - task: DownloadPipelineArtifact@2
+#         inputs:
+#           buildType: 'current'
+#           artifactName: 'manifests'
+#           targetPath: '$(Pipeline.Workspace)/manifests'
+#       - task: KubernetesManifest@0
+#         inputs:
+#           action: 'createSecret'
+#           kubernetesServiceConnection: 'eagunuworld_gke_clusters_creds'
+#           namespace: 'demo'
+#           secretType: 'dockerRegistry'
+#           secretName: '$(acrsecret)'
+#           dockerRegistryEndpoint: 'eagunuworld_dockerhub_azure_creds'
+#       - task: KubernetesManifest@0
+#         inputs:
+#           action: 'deploy'
+#           kubernetesServiceConnection: 'eagunuworld_gke_clusters_creds'
+#           namespace: 'demo'
+#           manifests: |
+#             $(Pipeline.Workspace)/manifests/azure-aks.yaml
