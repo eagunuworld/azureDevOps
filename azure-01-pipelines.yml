@@ -67,3 +67,4 @@ stages:
           namespace: 'demo'
           manifests: |
             $(Pipeline.Workspace)/manifests/azure-aks.yaml
+            containers: '$(eagunuworld_dockerhub_azure_creds)/$(imageRepo):$(tag)'
