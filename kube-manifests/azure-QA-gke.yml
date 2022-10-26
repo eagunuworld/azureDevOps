@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qa-ns-pod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: qa-ns-pod
+  template:
+    metadata:
+      labels:
+        app: qa-ns-pod
+    spec:
+      containers:
+      - name: qa-ns-con
+        image: eagunuworld/azure-demo:190
+        ports:
+        - containerPort: 5000
+# service type loadbalancer       
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qa-ns-svc
+spec:
+  selector:
+    app: qa-ns-pod
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: LoadBalancer
