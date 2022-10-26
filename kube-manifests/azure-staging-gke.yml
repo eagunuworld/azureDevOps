@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-python-deployment
+  name: staging-pod
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: my-python-app
+      app: staging
   template:
     metadata:
       labels:
-        app: my-python-app
+        app: staging
     spec:
       containers:
-      - name: mypythondockerrepo
+      - name: staging-con
         image: eagunuworld/azure-demo:186
         ports:
         - containerPort: 5000
@@ -22,10 +22,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-python-app-svc
+  name: staging-svc
 spec:
   selector:
-    app: my-python-app
+    app: staging
   ports:
     - protocol: TCP
       port: 5000
