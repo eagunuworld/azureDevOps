@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: qa-ns-pod
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: qa-ns-pod
